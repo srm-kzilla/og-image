@@ -1,6 +1,7 @@
 
 import { readFileSync } from 'fs';
 import marked from 'marked';
+import path from "path";
 import { sanitizeHtml } from './sanitizer';
 import { ParsedRequest } from './types';
 const twemoji = require('twemoji');
@@ -10,6 +11,10 @@ const emojify = (text: string) => twemoji.parse(text, twOptions);
 const rglr = readFileSync(`${__dirname}/../_fonts/Inter-Regular.woff2`).toString('base64');
 const bold = readFileSync(`${__dirname}/../_fonts/Inter-Bold.woff2`).toString('base64');
 const mono = readFileSync(`${__dirname}/../_fonts/Vera-Mono.woff2`).toString('base64');
+
+let templateMap = new Map<string,string>();
+// Use templateMap.set("template-name","file-name.extension") to add new templates
+// For example, if you have a file named "my-temp.png" under the "_templates" folder, you will need to add here templateMap.set("myPreferredName","my-temp.png")
 
 function getCss(theme: string, fontSize: string) {
     let background = 'white';
@@ -124,4 +129,16 @@ export function getHtml(parsedReq: ParsedRequest) {
         </div>
     </body>
 </html>`;
+}
+
+function getBackground(parsedReq: ParsedRequest): string {
+    const { theme, template } = parsedReq;
+    let imageSelection = "";
+    if(template!=""){
+        imageSelection = (theme==="dark")?"default-dark.png":"deault-light.png";
+    }
+    else{
+        imageSelection = (templateMap.get(template)!=undefined)?templateMap.get(template)!:"default-light.png";
+    }
+    return path.join(__dirname,"..","_templates",imageSelection);
 }
