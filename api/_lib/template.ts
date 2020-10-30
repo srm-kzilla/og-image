@@ -16,16 +16,9 @@ let templateMap = new Map<string,string>();
 // Use templateMap.set("template-name","file-name.extension") to add new templates
 // For example, if you have a file named "my-temp.png" under the "_templates" folder, you will need to add here templateMap.set("myPreferredName","my-temp.png")
 
-function getCss(theme: string, fontSize: string) {
-    let background = 'white';
-    let foreground = 'black';
-    let radial = 'lightgray';
+function getCss(theme: string, fontSize: string, template: string) {
+    let foreground = (theme==='dark')?'black':'white';
 
-    if (theme === 'dark') {
-        background = 'black';
-        foreground = 'white';
-        radial = 'dimgray';
-    }
     return `
     @font-face {
         font-family: 'Inter';
@@ -49,8 +42,8 @@ function getCss(theme: string, fontSize: string) {
       }
 
     body {
-        background: ${background};
-        background-image: radial-gradient(circle at 25px 25px, ${radial} 2%, transparent 0%), radial-gradient(circle at 75px 75px, ${radial} 2%, transparent 0%);
+        background-image: url(${getBackground(theme, template)});
+        background-repeat: no-repeat;
         background-size: 100px 100px;
         height: 100vh;
         display: flex;
@@ -78,16 +71,6 @@ function getCss(theme: string, fontSize: string) {
         justify-items: center;
     }
 
-    .logo {
-        margin: 0 75px;
-    }
-
-    .plus {
-        color: #BBB;
-        font-family: Times New Roman, Verdana;
-        font-size: 100px;
-    }
-
     .spacer {
         margin: 150px;
     }
@@ -109,14 +92,14 @@ function getCss(theme: string, fontSize: string) {
 }
 
 export function getHtml(parsedReq: ParsedRequest) {
-    const { text, theme, md, fontSize } = parsedReq;
+    const { text, theme, md, fontSize, template } = parsedReq;
     return `<!DOCTYPE html>
 <html>
     <meta charset="utf-8">
     <title>Generated Image</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        ${getCss(theme, fontSize)}
+        ${getCss(theme, fontSize, template)}
     </style>
     <body>
         <div>
@@ -131,8 +114,7 @@ export function getHtml(parsedReq: ParsedRequest) {
 </html>`;
 }
 
-function getBackground(parsedReq: ParsedRequest): string {
-    const { theme, template } = parsedReq;
+function getBackground(theme:string, template:string): string {
     let imageSelection = "";
     if(template!=""){
         imageSelection = (theme==="dark")?"default-dark.png":"deault-light.png";
